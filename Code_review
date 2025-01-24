@@ -1,0 +1,60 @@
+
+# Online Python - IDE, Editor, Compiler, Interpreter
+import pandas as pd
+import json
+import requests
+import uuid 
+
+def generate_request_id():
+    return str(uuid.uuid4())
+
+def derive_title(gender):
+    if gender.upper()== 'MALE':
+        return "Mr."
+    else return "Ms."
+
+def construct_email(First_Name,Last_Name):
+    return f"{First_Name.lower()}.{Last_Name.lower()}@happay.com"
+
+def excel_to_json_api(input_excel,api_url):
+    df=pd.read_excel(input_excel)
+    
+    for -, row in df.iterrows():
+        request_id=generate_request_id()
+        
+        title=derive_title(row.get("Gender",''))
+        
+        email=row.get("Email","")
+        if not email or pd.isna(email):
+            First_Name=row.get("First_Name", "unknown")
+            Last_Name=row.get("Last_Name","unknown")
+            email=construct_email(First_Name,Last_Name)
+        
+        json_payload={
+            "request_id":request_id,
+            "title":title,
+            "First_Name":row.get("First_Name",""),
+            "Last_Name":row.get("Last_Name",""),
+            "email":email,
+            "Gender":row.get("Gender"),
+            "extra_fields":
+        }
+        
+        response=requests.post(api_url,json=json_payload)
+        
+response = requests.post(api_url = URL,headers = HEADER,data = DATA,verify = False)
+HEADER = {
+		"Content-Type" : "application/json",
+		"Authorization": "Bearer iiKZR5dXUwwku5xjUMg0D46zQ"
+	}
+
+
+
+input_excel="https://hpy-prd-client-pub-docs.s3.ap-south-1.amazonaws.com/sample_excel_file_integration.xlsx"
+api_url="https://api-v2.happay.in/auth/v1/cards/add_user/"
+        
+excel_to_json_api(input_excel,api_url)
+
+    
+
+
