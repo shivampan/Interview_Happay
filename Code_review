@@ -1,60 +1,62 @@
-
-# Online Python - IDE, Editor, Compiler, Interpreter
 import pandas as pd
-import json
 import requests
-import uuid 
+import uuid
 
-def generate_request_id():
-    return str(uuid.uuid4())
 
-def derive_title(gender):
-    if gender.upper()== 'MALE':
-        return "Mr."
-    else return "Ms."
+file_path = "sample_excel_file_integration.xlsx"
 
-def construct_email(First_Name,Last_Name):
-    return f"{First_Name.lower()}.{Last_Name.lower()}@happay.com"
 
-def excel_to_json_api(input_excel,api_url):
-    df=pd.read_excel(input_excel)
+url = "https://api-v2.happay.in/auth/v1/cards/add_user/"
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer iiKZR5dXUwwku5xjUMg0D46zQ",
+}
+
+
+data = pd.read_excel(file_path)
+
+
+for _, row in data.iterrows():
+   
+    first_name = str(row["First Name"]) 
+    last_name = str(row["Last Name"])
+    dob = row["Date of Birth"] 
+    designation = str(row["Designation"]) 
+    department = str(row["Department"]) 
+    mobile = str(row["Mobile"])
+    gender = str(row["Gender"]) 
+    email = str(row["Email"]) if pd.notna(row["Email"]) else f"{first_name.lower()}.{last_name.lower()}@happay.in"
+    cost_centre = str(row["Cost Centre"]) 
+    cost_category = str(row["Cost Category"])
     
-    for -, row in df.iterrows():
-        request_id=generate_request_id()
-        
-        title=derive_title(row.get("Gender",''))
-        
-        email=row.get("Email","")
-        if not email or pd.isna(email):
-            First_Name=row.get("First_Name", "unknown")
-            Last_Name=row.get("Last_Name","unknown")
-            email=construct_email(First_Name,Last_Name)
-        
-        json_payload={
-            "request_id":request_id,
-            "title":title,
-            "First_Name":row.get("First_Name",""),
-            "Last_Name":row.get("Last_Name",""),
-            "email":email,
-            "Gender":row.get("Gender"),
-            "extra_fields":
-        }
-        
-        response=requests.post(api_url,json=json_payload)
-        
-response = requests.post(api_url = URL,headers = HEADER,data = DATA,verify = False)
-HEADER = {
-		"Content-Type" : "application/json",
-		"Authorization": "Bearer iiKZR5dXUwwku5xjUMg0D46zQ"
-	}
-
-
-
-input_excel="https://hpy-prd-client-pub-docs.s3.ap-south-1.amazonaws.com/sample_excel_file_integration.xlsx"
-api_url="https://api-v2.happay.in/auth/v1/cards/add_user/"
-        
-excel_to_json_api(input_excel,api_url)
-
     
-
-
+    request_id = str(uuid.uuid4())
+    user_id = f"usr_{uuid.uuid4().hex}"
+    
+    
+    title = "Mr." if gender.lower() == "male" else "Ms."
+    
+    
+    payload = {
+        "requestId": request_id,
+        "userId": user_id,
+        "firstName": first_name,
+        "lastName": last_name,
+        "emailId": email,
+        "mobileNo": mobile,
+        "mobile_extension": "+91",
+        "dob": str(dob.date()) if dob else None,
+        "title": title,
+        "gender": gender,
+        "extra_fields": {
+            "cost_centre": cost_centre,
+            "cost_category": cost_category,
+            "designation": designation,
+            "department": department,
+        },
+    }
+    
+   
+    response = requests.post(url, headers=headers, json=payload, verify=False)
+    
+    
